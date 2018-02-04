@@ -1,0 +1,98 @@
+{
+   main_life_0
+   
+   Copyright 2018 Alexandr <Alexandr@MSI>
+   
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+   
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+   MA 02110-1301, USA.
+   
+   
+}
+
+
+program untitled;
+
+uses crt;
+type
+body=record
+flag:integer;//0-dead,1-life,2-null;
+x,y:integer;
+genom:array[0..63]of integer;
+end;
+
+map=record
+kl:array[0..79,0..23]of body;
+end;
+
+var 
+bot:map;
+var 
+//x_lf,y_lf,i_lf:integer;
+menu_key:char;
+
+function map_generate(mg:map):map;
+var x_mg,y_mg,i_mg:integer;
+begin//0
+for y_mg:=0 to 23 do begin//1
+for x_mg:=0 to 79 do begin//2
+mg.kl[x_mg,y_mg].flag:=random(3);
+mg.kl[x_mg,y_mg].x:=x_mg;
+mg.kl[x_mg,y_mg].y:=y_mg;
+for i_mg:=0 to 63 do begin//3
+mg.kl[x_mg,y_mg].genom[i_mg]:=0;end;//3
+//writeln(x_mg,' x - y ',y_mg);
+//readln();
+end;end;//1//2
+map_generate:=mg;
+end;//0
+
+procedure map_output(mo:map);
+var i_mo,j_mo:integer;
+begin//0
+for j_mo:=0 to 23 do begin
+//writeln();
+for i_mo:=0 to 79 do begin
+if mo.kl[i_mo,j_mo].flag=1 then textcolor(green);
+if mo.kl[i_mo,j_mo].flag=0 then textcolor(white);
+if mo.kl[i_mo,j_mo].flag=2 then textcolor(black);
+write('.');{->80,\/24 );}
+
+end;end;
+end;//0
+
+function bot_muve(bm:map):map;
+begin
+
+end;
+
+
+
+BEGIN
+bot:=map_generate(bot);
+map_output(bot);
+
+repeat
+menu_key:=readkey;
+case menu_key of
+'1': begin
+ ClrScr;
+bot:=bot_muve(bot);
+end;
+end;
+until menu_key='3';
+	readln();	
+	
+END.
+
