@@ -27,9 +27,10 @@ program untitled;
 uses crt;
 type
 body=record
-flag:integer;//0-dead,1-life,2-null;
-x,y:integer;
+flag:byte;//0-dead,1-life,2-null;
+//x,y:integer;
 genom:array[0..63]of integer;
+hp,dmg,color:byte;
 end;
 
 map=record
@@ -38,22 +39,28 @@ end;
 
 var 
 bot:map;
-var 
-//x_lf,y_lf,i_lf:integer;
+
+i_lf:integer;
 menu_key:char;
 
 function map_generate(mg:map):map;
-var x_mg,y_mg,i_mg:integer;
+var x_mg,y_mg,i_mg,i2_mg:integer;
 begin//0
 for y_mg:=0 to 23 do begin//1
 for x_mg:=0 to 79 do begin//2
-mg.kl[x_mg,y_mg].flag:=random(3);
-mg.kl[x_mg,y_mg].x:=x_mg;
-mg.kl[x_mg,y_mg].y:=y_mg;
+i2_mg:=random(10);
+if i2_mg=0 then mg.kl[x_mg,y_mg].flag:=0;
+if i2_mg=1 then mg.kl[x_mg,y_mg].flag:=1;
+if i2_mg>1 then mg.kl[x_mg,y_mg].flag:=2;
+
+if i2_mg=0 then mg.kl[x_mg,y_mg].color:=0;
+if i2_mg=1 then mg.kl[x_mg,y_mg].color:=1;
+if i2_mg>1 then mg.kl[x_mg,y_mg].color:=2;
+
+mg.kl[x_mg,y_mg].hp:=1;
+mg.kl[x_mg,y_mg].dmg:=1;
 for i_mg:=0 to 63 do begin//3
 mg.kl[x_mg,y_mg].genom[i_mg]:=0;end;//3
-//writeln(x_mg,' x - y ',y_mg);
-//readln();
 end;end;//1//2
 map_generate:=mg;
 end;//0
@@ -64,8 +71,11 @@ begin//0
 for j_mo:=0 to 23 do begin
 //writeln();
 for i_mo:=0 to 79 do begin
-if mo.kl[i_mo,j_mo].flag=1 then textcolor(green);
-if mo.kl[i_mo,j_mo].flag=0 then textcolor(white);
+if mo.kl[i_mo,j_mo].color=1 then textcolor(green);
+if mo.kl[i_mo,j_mo].color=0 then textcolor(white);
+if mo.kl[i_mo,j_mo].color=2 then textcolor(black);
+if mo.kl[i_mo,j_mo].color=3 then textcolor(red);
+if mo.kl[i_mo,j_mo].color=4 then textcolor(yellow);
 if mo.kl[i_mo,j_mo].flag=2 then textcolor(black);
 write('.');{->80,\/24 );}
 
@@ -73,8 +83,90 @@ end;end;
 end;//0
 
 function bot_muve(bm:map):map;
-begin
+var x_bm,y_bm,i_bm:integer;
+begin//0
+for y_bm:=0 to 23 do begin//1
+for x_bm:=0 to 79 do begin//2
+i_bm:=random(8);
+//------------0--------------
+if (bm.kl[x_bm,y_bm].flag=1)and(i_bm=0) then begin //3
+if (bm.kl[x_bm-1,y_bm-1].flag=2) then begin //3.1
+if(x_bm-1>=0)and(y_bm-1>=0) then begin//4
+bm.kl[x_bm-1,y_bm-1]:=bm.kl[x_bm,y_bm];
+bm.kl[x_bm,y_bm].flag:=2;
+end;//4
+end;//3.1
+if (bm.kl[x_bm-1,y_bm-1].flag=0) then begin //3.2
+if(x_bm-1>=0)and(y_bm-1>=0) then begin//4
+bm.kl[x_bm,y_bm].hp:=bm.kl[x_bm,y_bm].hp+1;
+bm.kl[x_bm,y_bm].color:=4;
+bm.kl[x_bm-1,y_bm-1]:=bm.kl[x_bm,y_bm];
+bm.kl[x_bm,y_bm].flag:=2;
+end;//4
+end;//3.2
+if (bm.kl[x_bm-1,y_bm-1].flag=1) and (bm.kl[x_bm,y_bm].hp+bm.kl[x_bm,y_bm].dmg>bm.kl[x_bm-1,y_bm-1].hp+bm.kl[x_bm-1,y_bm-1].dmg) then begin //3.3
+if(x_bm-1>=0)and(y_bm-1>=0) then begin//4
+bm.kl[x_bm,y_bm].hp:=bm.kl[x_bm,y_bm].hp+1;
+bm.kl[x_bm,y_bm].color:=3;
+bm.kl[x_bm-1,y_bm-1]:=bm.kl[x_bm,y_bm];
+bm.kl[x_bm,y_bm].flag:=2;
+end;//4
+end;//3.3
+end;//3
 
+//------------1--------------
+if (bm.kl[x_bm,y_bm].flag=1)and(i_bm=1) and (bm.kl[x_bm,y_bm-1].flag=2) then begin //3
+if(y_bm-1>=0) then begin//4
+bm.kl[x_bm,y_bm-1]:=bm.kl[x_bm,y_bm];
+bm.kl[x_bm,y_bm].flag:=2;
+end;//4
+end;//3
+//------------2--------------
+if (bm.kl[x_bm,y_bm].flag=1)and(i_bm=2) and (bm.kl[x_bm+1,y_bm-1].flag=2) then begin //3
+if(x_bm+1<=79)and(y_bm-1>=0) then begin//4
+bm.kl[x_bm+1,y_bm-1]:=bm.kl[x_bm,y_bm];
+bm.kl[x_bm,y_bm].flag:=2;
+end;//4
+end;//3
+//------------3--------------
+if (bm.kl[x_bm,y_bm].flag=1)and(i_bm=3) and (bm.kl[x_bm+1,y_bm].flag=2) then begin //3
+if(x_bm+1<79) then begin//4
+bm.kl[x_bm+1,y_bm]:=bm.kl[x_bm,y_bm];
+bm.kl[x_bm,y_bm].flag:=2;
+end;//4
+end;//3
+//------------4--------------
+if (bm.kl[x_bm,y_bm].flag=1)and(i_bm=4) and (bm.kl[x_bm+1,y_bm+1].flag=2) then begin //3
+if(x_bm+1<79)and(y_bm+1<23) then begin//4
+bm.kl[x_bm+1,y_bm+1]:=bm.kl[x_bm,y_bm];
+bm.kl[x_bm,y_bm].flag:=2;
+end;//4
+end;//3
+//------------5--------------
+if (bm.kl[x_bm,y_bm].flag=1)and(i_bm=5) and (bm.kl[x_bm,y_bm+1].flag=2) then begin //3
+if(y_bm+1<23) then begin//4
+bm.kl[x_bm,y_bm+1]:=bm.kl[x_bm,y_bm];
+bm.kl[x_bm,y_bm].flag:=2;
+end;//4
+end;//3
+//------------6--------------
+if (bm.kl[x_bm,y_bm].flag=1)and(i_bm=6) and (bm.kl[x_bm-1,y_bm+1].flag=2) then begin //3
+if(x_bm-1>=0)and(y_bm+1<23) then begin//4
+bm.kl[x_bm-1,y_bm+1]:=bm.kl[x_bm,y_bm];
+bm.kl[x_bm,y_bm].flag:=2;
+end;//4
+end;//3
+//------------7--------------
+if (bm.kl[x_bm,y_bm].flag=1)and(i_bm=7) and (bm.kl[x_bm-1,y_bm].flag=2) then begin //3
+if(x_bm-1>=0) then begin//4
+bm.kl[x_bm-1,y_bm]:=bm.kl[x_bm,y_bm];
+bm.kl[x_bm,y_bm].flag:=2;
+end;//4
+end;//3
+
+
+end;end;//1//2
+bot_muve:=bm;
 end;
 
 
@@ -88,7 +180,9 @@ menu_key:=readkey;
 case menu_key of
 '1': begin
  ClrScr;
-bot:=bot_muve(bot);
+ for i_lf:=0 to 9 do 
+ bot:=bot_muve(bot);
+map_output(bot);
 end;
 end;
 until menu_key='3';
