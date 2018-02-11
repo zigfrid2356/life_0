@@ -37,6 +37,9 @@ map=record
 kl:array[0..79,0..23]of body;
 end;
 
+t_map=record
+t1,t2:body;
+end;
 var 
 bot:map;
 
@@ -57,10 +60,16 @@ if i2_mg=0 then mg.kl[x_mg,y_mg].color:=0;
 if i2_mg=1 then mg.kl[x_mg,y_mg].color:=1;
 if i2_mg>1 then mg.kl[x_mg,y_mg].color:=2;
 
-mg.kl[x_mg,y_mg].hp:=1;
+mg.kl[x_mg,y_mg].hp:=random(5)+1;
 mg.kl[x_mg,y_mg].dmg:=1;
 for i_mg:=0 to 63 do begin//3
 mg.kl[x_mg,y_mg].genom[i_mg]:=0;end;//3
+mg.kl[x_mg,y_mg].genom[0]:=0;
+mg.kl[x_mg,y_mg].genom[1]:=random(8);
+mg.kl[x_mg,y_mg].genom[2]:=random(1);
+mg.kl[x_mg,y_mg].genom[3]:=random(1);
+mg.kl[x_mg,y_mg].genom[4]:=random(500)+500;
+mg.kl[x_mg,y_mg].genom[5]:=random(1);
 end;end;//1//2
 map_generate:=mg;
 end;//0
@@ -76,93 +85,98 @@ if mo.kl[i_mo,j_mo].color=0 then textcolor(white);
 if mo.kl[i_mo,j_mo].color=2 then textcolor(black);
 if mo.kl[i_mo,j_mo].color=3 then textcolor(red);
 if mo.kl[i_mo,j_mo].color=4 then textcolor(yellow);
+if mo.kl[i_mo,j_mo].flag=0 then textcolor(white);
 if mo.kl[i_mo,j_mo].flag=2 then textcolor(black);
+
 write('.');{->80,\/24 );}
 
 end;end;
 end;//0
 
+function body_work(bw1,bw2:body;i_bw:integer):t_map;//bw1- activ, bw2-passiv
+begin
+if i_bw<=7 then begin//00
+if bw2.flag=2 then begin //0
+bw1.genom[0]:=bw1.genom[0]+1;
+bw2:=bw1;bw1.flag:=2; end;//0
+
+if (bw2.flag=0) and (bw1.genom[2]=1) then begin //1
+bw1.color:=4;bw1.hp:=bw1.hp+1;bw1.genom[0]:=bw1.genom[0]+1;
+bw2:=bw1;bw1.flag:=2; end;//1
+
+ if (bw2.flag=1) and (bw1.genom[3]=1) and (bw1.hp>bw2.hp) then begin //2
+bw1.color:=3;bw1.hp:=bw1.hp+1;bw1.genom[0]:=bw1.genom[0]+1;
+bw2:=bw1;bw1.flag:=2; end;//2
+
+if bw1.genom[0]>bw1.genom[4] then bw1.flag:=0;
+if bw2.genom[0]>bw2.genom[4] then bw2.flag:=0;
+end;//00
+
+if (i_bw>7)and (bw2.flag=2) and(bw1.genom[5]=1) then begin //000
+bw2:=bw1;
+bw2.color:=1;
+bw2.hp:=bw2.hp+random(500);
+bw2.genom[0]:=0;
+bw2.genom[4]:=random(5)+5;
+end;//000
+
+body_work.t1:=bw1;
+body_work.t2:=bw2;
+end;
+
+
 function bot_muve(bm:map):map;
-var x_bm,y_bm,i_bm:integer;
+var x_bm,y_bm,i_bm,tx,ty:integer;
+bm_t:t_map;
 begin//0
 for y_bm:=0 to 23 do begin//1
 for x_bm:=0 to 79 do begin//2
-i_bm:=random(8);
-//------------0--------------
-if (bm.kl[x_bm,y_bm].flag=1)and(i_bm=0) then begin //3
-if (bm.kl[x_bm-1,y_bm-1].flag=2) then begin //3.1
-if(x_bm-1>=0)and(y_bm-1>=0) then begin//4
-bm.kl[x_bm-1,y_bm-1]:=bm.kl[x_bm,y_bm];
-bm.kl[x_bm,y_bm].flag:=2;
-end;//4
-end;//3.1
-if (bm.kl[x_bm-1,y_bm-1].flag=0) then begin //3.2
-if(x_bm-1>=0)and(y_bm-1>=0) then begin//4
-bm.kl[x_bm,y_bm].hp:=bm.kl[x_bm,y_bm].hp+1;
-bm.kl[x_bm,y_bm].color:=4;
-bm.kl[x_bm-1,y_bm-1]:=bm.kl[x_bm,y_bm];
-bm.kl[x_bm,y_bm].flag:=2;
-end;//4
-end;//3.2
-if (bm.kl[x_bm-1,y_bm-1].flag=1) and (bm.kl[x_bm,y_bm].hp+bm.kl[x_bm,y_bm].dmg>bm.kl[x_bm-1,y_bm-1].hp+bm.kl[x_bm-1,y_bm-1].dmg) then begin //3.3
-if(x_bm-1>=0)and(y_bm-1>=0) then begin//4
-bm.kl[x_bm,y_bm].hp:=bm.kl[x_bm,y_bm].hp+1;
-bm.kl[x_bm,y_bm].color:=3;
-bm.kl[x_bm-1,y_bm-1]:=bm.kl[x_bm,y_bm];
-bm.kl[x_bm,y_bm].flag:=2;
-end;//4
-end;//3.3
-end;//3
+i_bm:=random(16);
+tx:=x_bm;
+ty:=y_bm;
+if tx-1<=0 then tx:=80;if tx+1>=79 then tx:=1;
+if ty-1<=0 then tx:=24;if ty+1>=23 then tx:=1;
 
+//------------0--------------
+if (bm.kl[x_bm,y_bm].flag=1)and((i_bm=0)or(i_bm=8))  then begin
+bm_t:=body_work(bm.kl[x_bm,y_bm],bm.kl[tx-1,ty-1],i_bm);
+bm.kl[x_bm,y_bm]:=bm_t.t1;
+bm.kl[tx-1,ty-1]:=bm_t.t2;end;
 //------------1--------------
-if (bm.kl[x_bm,y_bm].flag=1)and(i_bm=1) and (bm.kl[x_bm,y_bm-1].flag=2) then begin //3
-if(y_bm-1>=0) then begin//4
-bm.kl[x_bm,y_bm-1]:=bm.kl[x_bm,y_bm];
-bm.kl[x_bm,y_bm].flag:=2;
-end;//4
-end;//3
+if (bm.kl[x_bm,y_bm].flag=1)and((i_bm=1)or(i_bm=9)) then begin
+bm_t:=body_work(bm.kl[x_bm,y_bm],bm.kl[tx,ty-1],i_bm);
+bm.kl[x_bm,y_bm]:=bm_t.t1;
+bm.kl[x_bm,ty-1]:=bm_t.t2;end;
 //------------2--------------
-if (bm.kl[x_bm,y_bm].flag=1)and(i_bm=2) and (bm.kl[x_bm+1,y_bm-1].flag=2) then begin //3
-if(x_bm+1<=79)and(y_bm-1>=0) then begin//4
-bm.kl[x_bm+1,y_bm-1]:=bm.kl[x_bm,y_bm];
-bm.kl[x_bm,y_bm].flag:=2;
-end;//4
-end;//3
+if (bm.kl[x_bm,y_bm].flag=1)and((i_bm=2)or(i_bm=10)) then begin
+bm_t:=body_work(bm.kl[x_bm,y_bm],bm.kl[tx+1,ty-1],i_bm);
+bm.kl[x_bm,y_bm]:=bm_t.t1;
+bm.kl[tx+1,ty-1]:=bm_t.t2;end;
 //------------3--------------
-if (bm.kl[x_bm,y_bm].flag=1)and(i_bm=3) and (bm.kl[x_bm+1,y_bm].flag=2) then begin //3
-if(x_bm+1<79) then begin//4
-bm.kl[x_bm+1,y_bm]:=bm.kl[x_bm,y_bm];
-bm.kl[x_bm,y_bm].flag:=2;
-end;//4
-end;//3
+if (bm.kl[x_bm,y_bm].flag=1)and((i_bm=3)or(i_bm=11)) then begin
+bm_t:=body_work(bm.kl[x_bm,y_bm],bm.kl[tx+1,y_bm],i_bm);
+bm.kl[x_bm,y_bm]:=bm_t.t1;
+bm.kl[tx+1,y_bm]:=bm_t.t2;end;
 //------------4--------------
-if (bm.kl[x_bm,y_bm].flag=1)and(i_bm=4) and (bm.kl[x_bm+1,y_bm+1].flag=2) then begin //3
-if(x_bm+1<79)and(y_bm+1<23) then begin//4
-bm.kl[x_bm+1,y_bm+1]:=bm.kl[x_bm,y_bm];
-bm.kl[x_bm,y_bm].flag:=2;
-end;//4
-end;//3
+if (bm.kl[x_bm,y_bm].flag=1)and((i_bm=4)or(i_bm=12)) then begin
+bm_t:=body_work(bm.kl[x_bm,y_bm],bm.kl[tx+1,ty+1],i_bm);
+bm.kl[x_bm,y_bm]:=bm_t.t1;
+bm.kl[tx+1,ty+1]:=bm_t.t2;end; 
 //------------5--------------
-if (bm.kl[x_bm,y_bm].flag=1)and(i_bm=5) and (bm.kl[x_bm,y_bm+1].flag=2) then begin //3
-if(y_bm+1<23) then begin//4
-bm.kl[x_bm,y_bm+1]:=bm.kl[x_bm,y_bm];
-bm.kl[x_bm,y_bm].flag:=2;
-end;//4
-end;//3
+if (bm.kl[x_bm,y_bm].flag=1)and((i_bm=5)or(i_bm=13)) then begin
+bm_t:=body_work(bm.kl[x_bm,y_bm],bm.kl[x_bm,ty+1],i_bm);
+bm.kl[x_bm,y_bm]:=bm_t.t1;
+bm.kl[x_bm,ty+1]:=bm_t.t2;end; 
 //------------6--------------
-if (bm.kl[x_bm,y_bm].flag=1)and(i_bm=6) and (bm.kl[x_bm-1,y_bm+1].flag=2) then begin //3
-if(x_bm-1>=0)and(y_bm+1<23) then begin//4
-bm.kl[x_bm-1,y_bm+1]:=bm.kl[x_bm,y_bm];
-bm.kl[x_bm,y_bm].flag:=2;
-end;//4
-end;//3
+if (bm.kl[x_bm,y_bm].flag=1)and((i_bm=6)or(i_bm=14)) then begin
+bm_t:=body_work(bm.kl[x_bm,y_bm],bm.kl[tx-1,ty+1],i_bm);
+bm.kl[x_bm,y_bm]:=bm_t.t1;
+bm.kl[tx-1,ty+1]:=bm_t.t2;end; 
 //------------7--------------
-if (bm.kl[x_bm,y_bm].flag=1)and(i_bm=7) and (bm.kl[x_bm-1,y_bm].flag=2) then begin //3
-if(x_bm-1>=0) then begin//4
-bm.kl[x_bm-1,y_bm]:=bm.kl[x_bm,y_bm];
-bm.kl[x_bm,y_bm].flag:=2;
-end;//4
-end;//3
+if (bm.kl[x_bm,y_bm].flag=1)and((i_bm=7)or(i_bm=15)) then begin 
+bm_t:=body_work(bm.kl[x_bm,y_bm],bm.kl[tx-1,y_bm],i_bm);
+bm.kl[x_bm,y_bm]:=bm_t.t1;
+bm.kl[tx-1,y_bm]:=bm_t.t2;end;
 
 
 end;end;//1//2
@@ -172,6 +186,7 @@ end;
 
 
 BEGIN
+randomize;
 bot:=map_generate(bot);
 map_output(bot);
 
@@ -180,7 +195,7 @@ menu_key:=readkey;
 case menu_key of
 '1': begin
  ClrScr;
- for i_lf:=0 to 9 do 
+ for i_lf:=0 to 99 do 
  bot:=bot_muve(bot);
 map_output(bot);
 end;

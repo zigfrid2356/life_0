@@ -7,11 +7,11 @@
 
 Y
 
-green - life
-white - dead
-black - null
-red - hunter
-yellow - canibal
+(1) green - life
+(0) white - dead
+(2) black - null
+(3) red - hunter
+(4) yellow - canibal
 
 genom
 ячейка/значение/описание
