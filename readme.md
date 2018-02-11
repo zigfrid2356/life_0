@@ -7,6 +7,10 @@
 
 Y
 
+flag
+0-dead,1-life,2-null;
+
+color
 (1) green - life
 (0) white - dead
 (2) black - null
